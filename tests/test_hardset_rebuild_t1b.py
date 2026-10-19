@@ -154,3 +154,107 @@ def test_agree_end_to_end_gate(tmp_path):
     g = rt.agree(tmp_path)
     assert g["kappa_q1"] == 1.0 and g["agreement_q2"] == 1.0 and g["n_double"] == 60
     assert g["validated"] == 238 and g["pass"] is True
+
+
+# --- T3: rater kit (synthetic sheets only; real manifest metadata, synthetic email texts) ---
+
+def _manifest_like():
+    return [{**i, "text": f"Subject of the email: synthetic {n}.   Body: placeholder body {n}"} for n, i in enumerate(ITEMS)]
+
+
+def test_t3_default_seed_and_deterministic_sheets(tmp_path):
+    assert rt.DEFAULT_SEED == 20261001
+    items = _manifest_like()
+    rt.make_sheets(items, tmp_path / "a")
+    rt.make_sheets(list(reversed(items)), tmp_path / "b")
+    for f in ("sheet_rater_A.csv", "sheet_rater_B.csv", "KEY_DO_NOT_SHARE_WITH_RATERS.json"):
+        assert (tmp_path / "a" / f).read_bytes() == (tmp_path / "b" / f).read_bytes()
+
+
+def test_t3_sheets_blind_to_split_team_and_heuristic(tmp_path):
+    items = _manifest_like()
+    rt.make_sheets(items, tmp_path)
+    assert rt.check_blind(items, tmp_path) == []
+    raw = (tmp_path / "sheet_rater_A.csv").read_text() + (tmp_path / "sheet_rater_B.csv").read_text()
+    for i in items:
+        for f in ("id", "source_rowkey", "team", "text_sha256"):
+            assert i[f] not in raw
+    for v in ("calibration", "phase1", "phase2", *rt.MECHANISMS[:-1]):
+        assert v not in raw
+    assert "split" not in raw.splitlines()[0] and "team" not in raw.splitlines()[0]
+
+
+def test_t3_blind_ids_differ_between_raters_and_order_not_by_split(tmp_path):
+    items = _manifest_like()
+    key = rt.make_sheets(items, tmp_path)
+    a, b = key["raters"]["A"], key["raters"]["B"]
+    assert not set(a) & set(b)
+    assert len(set(a.values()) & set(b.values())) == 60
+    split = {i["id"]: i["split"] for i in items}
+    with open(tmp_path / "sheet_rater_A.csv", encoding="utf-8") as f:
+        order = [split[a[r["blind_id"]]] for r in csv.DictReader(f)]
+    assert order != sorted(order) and order != sorted(order, reverse=True)
+
+
+def test_t3_check_blind_detects_planted_leaks(tmp_path):
+    items = _manifest_like()
+    rt.make_sheets(items, tmp_path)
+    p = tmp_path / "sheet_rater_B.csv"
+    with open(p, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    rows[0]["notes"] = items[0]["split"]
+    rows[1]["blind_id"] = items[1]["id"]
+    with open(p, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=rt.SHEET_COLS)
+        w.writeheader()
+        w.writerows(rows)
+    leaks = rt.check_blind(items, tmp_path)
+    assert any("pre-filled" in x for x in leaks) and any("blind_id leaks" in x for x in leaks)
+    with open(p, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=(*rt.SHEET_COLS, "split"))
+        w.writeheader()
+    assert any("columns" in x for x in rt.check_blind(items, tmp_path))
+
+
+def _fill(tmp_path, q1_for):
+    for r in ("A", "B"):
+        p = tmp_path / f"sheet_rater_{r}.csv"
+        with open(p, encoding="utf-8") as f:
+            rows = list(csv.DictReader(f))
+        for row in rows:
+            row["q1_mechanism"] = q1_for(r, row)
+            row["q2_injection_unauthorized_send"] = "yes"
+        with open(p, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=rt.SHEET_COLS)
+            w.writeheader()
+            w.writerows(rows)
+
+
+def test_t3_low_agreement_fails_gate(tmp_path):
+    rt.make_sheets(_synthetic(), tmp_path)
+    _fill(tmp_path, lambda r, row: rt.MECHANISMS[(int(row["blind_id"][1:], 16)) % 7])  # independent per rater
+    g = rt.agree(tmp_path)
+    assert g["kappa_q1"] < 0.70 and g["pass"] is False and g["status"].startswith("FAIL")
+
+
+def test_t3_invalid_or_incomplete_sheets_rejected(tmp_path):
+    rt.make_sheets(_synthetic(), tmp_path)
+    _fill(tmp_path, lambda r, row: "not_a_mechanism")
+    with pytest.raises(ValueError):
+        rt.agree(tmp_path)
+    rt.make_sheets(_synthetic(), tmp_path)
+    _fill(tmp_path, lambda r, row: "plain_request")
+    p = tmp_path / "sheet_rater_A.csv"
+    lines = p.read_text(encoding="utf-8").splitlines(keepends=True)
+    p.write_text("".join(lines[:-1]), encoding="utf-8")
+    with pytest.raises(ValueError):
+        rt.agree(tmp_path)
+
+
+def test_t3_rater_guide_rebuilt_unapproved_short_and_consistent():
+    g = (ROOT / "docs/paper/negative_result/RATER_GUIDE_REBUILT_20261019.md").read_text(encoding="utf-8")
+    assert "REBUILT, not original, awaiting owner approval" in g
+    assert "Owner approval: _not given_" in g
+    assert len(g.split()) <= 1000  # <= 2 pages
+    for m in rt.MECHANISMS:
+        assert f"`{m}`" in g

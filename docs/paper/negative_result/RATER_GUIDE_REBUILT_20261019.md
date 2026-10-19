@@ -1,5 +1,7 @@
 # Rater guide, Hard set v1 (REBUILT 2026-10-19; NOT the original)
 
+**Status: REBUILT, not original, awaiting owner approval.** Owner approval: _not given_ (date: ____). Do not start rating until this line is filled in by the owner.
+
 > **REBUILT 2026-10-19, not original.** The original `RATER_GUIDE_20261001.md` was lost (Path 2 / T1, PR #162; protocol deviation log, section 9). This guide was rewritten from the Phase 1a/1c rules in `PHASES_BEFORE_MAIN_20261001.md` and the category names in `datasets/attackset_hard_v1/MANIFEST.json`. The owner must approve the wording before any rating starts.
 
 ## Your task
