@@ -83,6 +83,10 @@ for d,e in (('progent',(20,1.0)),('drift',(20,1.0)),('tool_filter',(20,1.0)),('r
     g=(cv[d+'|attarg']['agree'],cv[d+'|attarg']['kappa']); ok=g==e; hard_bad+=not ok; P('HARD ATT-ARG validation',d,g,'expected',e,'OK' if ok else 'MISMATCH')
 for k,e in (('all|attarg',(78,80,0.95)),('all|attempted',(76,80,0.9))):
     g=(cv[k]['agree'],cv[k]['n'],cv[k]['kappa']); ok=g==e; hard_bad+=not ok; P('HARD validation total',k,g,'expected',e,'OK' if ok else 'MISMATCH')
+if os.path.exists('review/owner_agreement.json'):
+    oa=json.load(open('review/owner_agreement.json')); g=(oa['agree'],oa['n'],oa['raw_pct'],oa['wilson95'],oa['cohen_kappa'],sorted(x['id'] for x in oa['disagreements']))
+    e=(14,16,87.5,[0.64,0.965],0.619,['R15','R26']); ok=g==e; hard_bad+=not ok; P('HARD owner agreement',g,'expected',e,'OK' if ok else 'MISMATCH')
+    ms_txt=open(MS,encoding='utf-8').read(); ok=all(t in ms_txt for t in ('14/16','87.5%','64.0–96.5%','κ = 0.62','R15, R26')); hard_bad+=not ok; P('HARD owner agreement in manuscript','OK' if ok else 'MISMATCH')
 ok=hashlib.sha256(open('attarg/validation/labels_AI.json','rb').read()).hexdigest()==open('attarg/validation/labels_AI.sha256').read().split()[0]; hard_bad+=not ok; P('HARD ATT-ARG label lock','OK' if ok else 'MISMATCH')
 for lk in ('attarg/PROCEDURE_ATTARG.sha256','ext/PROCEDURE_EXT_AUDIT.sha256','exposure/PROCEDURE_EXPOSURE.sha256','human_packet/PROCEDURE_HUMAN_PACKET.sha256','human_packet/KEY_SEPARATE.sha256'):
     base=os.path.dirname(lk); bad=0
@@ -141,6 +145,10 @@ NUM=re.compile(r'(?<![\w.#`/])[+\-\u2212]?\d[\d,]*(?:\.\d+)?(?:/\d[\d,]*)?%?(?![
 DERIVED={'3/9','1/9','2/9','4/9','4/4','290','299','227','235','97bdb074'}  # Part-1 verified counts
 # Resolved text-search flags (token, context substring) -> justification. See review/FLAG_RESOLUTIONS.md
 ALLOW={
+    ('14/16','Owner and AI reviewer agreed'):'owner agreement agree/n from review/owner_agreement.json; checked by HARD owner agreement',
+    ('14/16','owner subset of the judge-review items'):'owner agreement agree/n; checked by HARD owner agreement',
+    ('14/16','owner check (14/16'):'owner agreement agree/n; checked by HARD owner agreement',
+    ('0.62','κ = 0.62'):'owner kappa 0.619 rounded; checked by HARD owner agreement',
  ('12','Hash check (re-run 2026-10-16 12:2x'):'clock time 12:2x Tehran of the hash re-run, not a data value',
  ('28','Of the 28 AgentDyn-specific injection tasks'):'= dailylife 10 + shopping 9 + github 9; HARD-checked (28,20) in Part 1 from gt_audit_agentdyn_v1.json',
  ('28','all in the 28 AgentDyn-specific tasks'):'same 28 as above; HARD-checked in Part 1',
