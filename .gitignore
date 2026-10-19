@@ -101,3 +101,6 @@ t -q -p no:langsmith
 src/adapti_guard/detector/*.bak
 src/adapti_guard/detector/*.v*
 src/adapti_guard/detector/*_backup*
+
+# Private / raw data (rater sheets, raw item texts): never committed
+local_private/
