@@ -1,3 +1,5 @@
+> **SUPERSEDED, DO NOT CITE.** The headline numbers (0.44->0.90, 0.97->0.80) are under correction (PROPOSED correction 2026-10-15, `docs/research/corrections/MANUSCRIPT_CORRECTIONS_DRAFT.md`, branch `docs/e1-b3-corrections`, commit `e8e9436`). See [`docs/PAPERS_STATUS.md`](../../../PAPERS_STATUS.md).
+
 # Overleaf / arXiv package: negative-result paper (draft, not submitted)
 
 Source text: `docs/paper/negative_result/MANUSCRIPT_DRAFT_v1.md` (assembled from the section sources by `scripts/assemble_manuscript.py`). Nothing has been submitted anywhere; posting is the owner's action.

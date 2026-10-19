@@ -1,3 +1,5 @@
+> **SUPERSEDED, DO NOT CITE.** The headline numbers (0.44->0.90, 0.97->0.80) are under correction (PROPOSED correction 2026-10-15, `docs/research/corrections/MANUSCRIPT_CORRECTIONS_DRAFT.md`, branch `docs/e1-b3-corrections`, commit `e8e9436`). See [`docs/PAPERS_STATUS.md`](../../PAPERS_STATUS.md).
+
 # What Reached the Executor? Six Measurement Checks for Evaluating Runtime Defenses of LLM Agents, with a Negative Result
 
 ---
