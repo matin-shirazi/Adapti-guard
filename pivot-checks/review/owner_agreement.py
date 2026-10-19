@@ -4,7 +4,7 @@ Runs only when review/owner_labels.jsonl exists (format as owner_labels.TEMPLATE
 Outputs raw agreement %, Wilson 95% CI for agreement, Cohen's kappa, and the disagreement list.
 Writes review/owner_agreement.json. Offline; invents nothing (exits if file is missing or incomplete)."""
 import json, math, os, sys, collections
-os.chdir('/workspace/pivot-checks')
+os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 P = 'review/owner_labels.jsonl'
 if not os.path.exists(P):
     sys.exit('review/owner_labels.jsonl not found; owner labels pending. Nothing computed.')

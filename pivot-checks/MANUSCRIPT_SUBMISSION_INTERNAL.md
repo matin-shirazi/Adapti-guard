@@ -109,7 +109,7 @@ We do **not** claim to be the first audit of an AgentDojo-derived prompt-injecti
 - In this code version `check()` also reports every user task in every suite, including the four original AgentDojo suites, as "not injectable" (40/40, 20/20, 16/16, 21/21, 20/20). Root cause: tool-message content is a list of content blocks, and `is_task_injectable()` only scans string contents, so it returns False although the canary is present. The function is called only in the user-task section of `check()`, so it cannot affect injection-task checks [src: c_items/C_RESULTS.md; ext/injectable_probe_dyn.txt; ext/injectable_probe_agentdojo.txt].
 - Replaying user-task reference solutions, utility fails for shopping 20/20, github 13/20 and dailylife 9/20 user tasks (and workspace user_task_7). Most failing AgentDyn cases hit an OTP or verification gate that a static reference cannot pass (e.g. a hard-coded OTP rejected as incorrect). This affects the self-check, not stored labels; we did not audit each task [src: c_items/C_RESULTS.md; c_items/usertask_probe.txt].
 
-**Extended audit of related code bases [CODE FACT; EXPLORATORY scope; procedure hash-locked before running].** We ran the same unchanged `check()` and per-task logic on every registered suite and version of four code bases [src: ext/EXT_AUDIT_RESULTS.md; ext/audit_{agentdojo,agentdyn,autodojo}.txt; ext/PROCEDURE_EXT_AUDIT.sha256]: AgentDojo (089ed468, MIT [license to verify]), AgentDyn (SaFo-Lab 5353cf76, MIT), AutoDojo (xhOwenMa/AutoDojo aa458794, MIT) and uber/ADR (a6076aa3, Apache-2.0). ADR does not import as a package. By diff it is AgentDojo v1/v1_1 with only import paths and a `TASK_TYPE` attribute changed, so it was not executed. Unique injection tasks failing their own reference-solution check, counted once per code base where they are introduced:
+**Extended audit of related code bases [CODE FACT; EXPLORATORY scope; procedure hash-locked before running].** We ran the same unchanged `check()` and per-task logic on every registered suite and version of four code bases [src: ext/EXT_AUDIT_RESULTS.md; ext/audit_{agentdojo,agentdyn,autodojo}.txt; ext/PROCEDURE_EXT_AUDIT.sha256]: AgentDojo (089ed468, MIT), AgentDyn (SaFo-Lab 5353cf76, MIT), AutoDojo (xhOwenMa/AutoDojo aa458794, MIT) and uber/ADR (a6076aa3, Apache-2.0). ADR does not import as a package. By diff it is AgentDojo v1/v1_1 with only import paths and a `TASK_TYPE` attribute changed, so it was not executed. Unique injection tasks failing their own reference-solution check, counted once per code base where they are introduced:
 
 | Benchmark | Stub | Wrong args | Missing step | Tool absent | Other |
 |---|---|---|---|---|---|
@@ -238,11 +238,11 @@ We replayed the logged tool calls of all scorable episodes against current check
 
 ### 6.2 Judge-vs-checker case study [EXPLORATORY]
 
-On 600 AgentDyn gpt-4o attack episodes (200 per defense, 3 defenses), two LLM judges (gemini-2.5-flash-lite, claude-haiku-5.5; 1,396 calls, $0.3787) agreed with the state checker at κ 0.932 and 0.940 on repeat_user_prompt but 0.454 and 0.632 on tool_filter [src: judge_pilot/RESULTS.md]. A single AI reviewer (one AI reviewer, one model, three defenses; defense identity not hidden) adjudicated the 43 disagreements plus 10 controls and favoured the checker in 20/20 tool_filter and 11/13 PG2 disagreements, but the judge in 3/6 repeat_user_prompt items [src: review/REVIEW_RESULTS.md]. The judges' typical error was to count attempts (stalled OTP checkouts, failed forms, text-only mentions) as successes, the same attempted-vs-executed distinction as §5. No claim beyond this one model and three defenses is made.
+On 600 AgentDyn gpt-4o attack episodes (200 per defense, 3 defenses), two LLM judges (gemini-2.5-flash-lite, claude-haiku-5.5; 1,396 calls, $0.3787) agreed with the state checker at κ 0.932 and 0.940 on repeat_user_prompt but 0.454 and 0.632 on tool_filter [src: judge_pilot/RESULTS.md]. A single AI reviewer (one AI reviewer, one model, three defenses; defense identity not hidden) adjudicated the 43 disagreements plus 10 controls and favoured the checker in 20/20 tool_filter and 11/13 PG2 disagreements, but the judge in 3/6 repeat_user_prompt items [src: review/REVIEW_RESULTS.md]. **Human check of the AI reviewer.** The owner, blind to the AI reviewer's labels and the key, independently labelled a 16-item subset of the disagreement and control items (`review/owner_subset_ids.json`). Owner and AI reviewer agreed on 14/16 items (87.5%; Wilson 95% CI 64.0–96.5%), Cohen's κ = 0.62. Both disagreements (R15, R26) were items the AI reviewer marked *unclear* and the owner marked *executed* (a confirmed password change). With 16 items this is a coarse check and does not replace an independent second rater on the full set. Only 3 of the 16 items were labelled *executed* by the owner, so κ is unstable and should be read as indicative only. [src: review/owner_agreement.json] The judges' typical error was to count attempts (stalled OTP checkouts, failed forms, text-only mentions) as successes, the same attempted-vs-executed distinction as §5. No claim beyond this one model and three defenses is made.
 
 ## 7 Limitations
 
-- **No human labels.** Every label in this paper (53 disagreement and control items, 60 recall items, 113 earlier scorer-validation items, 80 progent/drift scorer-validation items, 80 ATT-ARG validation items) comes from one AI assistant, which also designed the analyses, the preregistration, the target map and the stage map [src: review/REVIEW_RESULTS.md; review/RECALL_RESULTS.md; review/RANKING_FLIP_RESULTS.md §2; bitems/B_RESULTS.md]. Sixteen blind owner labels are pending (`review/OWNER_SUBSET.md`). Blinding was imperfect in the judge review (defense identity visible) and the labeller of the scorer validation knew how the scorer works.
+- **Almost no human labels.** Every label in this paper (53 disagreement and control items, 60 recall items, 113 earlier scorer-validation items, 80 progent/drift scorer-validation items, 80 ATT-ARG validation items) comes from one AI assistant, which also designed the analyses, the preregistration, the target map and the stage map [src: review/REVIEW_RESULTS.md; review/RECALL_RESULTS.md; review/RANKING_FLIP_RESULTS.md §2; bitems/B_RESULTS.md]. The only human check is a blind 16-item owner subset of the judge-review items (14/16 agreement, κ = 0.62; §6.2, `review/owner_agreement.json`); no other label was checked by a human. Blinding was imperfect in the judge review (defense identity visible) and the labeller of the scorer validation knew how the scorer works.
 - **One benchmark in substance.** The ranking result rests on eight AgentDyn cells; AgentDojo contributes one cell without execution-time defenses, and none if unversioned runs are excluded.
 - **Two execution-time defenses.** Progent and drift carry every reversal under the preregistered and clustered rules; stage cannot be separated from defense identity.
 - **Statistics.** The preregistered bootstrap resamples episodes, not user tasks, and applies no multiplicity correction across 299 (290) pairs; each AgentDyn subset cell has only 20 user-task clusters; the task-clustered analysis is the more appropriate one and gives 1/9 on the full data [src: clustered/clustered_results.json]. The judge bootstraps are not clustered.
@@ -263,7 +263,7 @@ On 600 AgentDyn gpt-4o attack episodes (200 per defense, 3 defenses), two LLM ju
 
 ## 9 Reproducibility
 
-All paths are relative to `/workspace/pivot-checks/`. Python 3 with numpy; AgentDyn code from `dyn/` (commit 5353cf7) installed in `venv/`. No network is needed except for the judge pilot.
+All paths are relative to the `pivot-checks/` directory of the repository. Python 3 with numpy; AgentDyn code from `dyn/` (commit 5353cf7) installed in `venv/`. No network is needed except for the judge pilot.
 
 | Result | Script / command | Output | Lock |
 |---|---|---|---|
@@ -298,7 +298,7 @@ Auditing artifacts we did not produce supports two observations about AgentDyn, 
 - **Secondary:** with the argument-level scorer ATT-ARG, attempt- and execution-based scoring rank defenses broadly alike (τb 0.642–1.0), and the preregistered flip rule finds reversals in 3/9 cells (2/9 in a post-hoc subset), all involving progent and all on AgentDyn; 1/9 under task-clustered inference and 0/9 without progent. The name-match drift reversals do not survive argument-level scoring. This is an empirical instance of the inversion Pathade et al. analyse, on one benchmark.
 - **Short:** checker drift is small in aggregate (0.27%) but up to 7.1 pp in one set; in a one-model, three-defense case study, LLM judges counted blocked attempts as successes.
 
-All labels come from one AI assistant; owner labels, maintainer confirmation and independent reproduction are pending.
+All labels come from one AI assistant except a blind 16-item owner check (14/16 agreement, κ = 0.62); maintainer confirmation and independent reproduction are pending.
 
 ## Declarations
 
@@ -308,9 +308,9 @@ All labels come from one AI assistant; owner labels, maintainer confirmation and
 
 **Data and code availability.** All analysed runs are public releases of AgentDojo and AgentDyn. Analysis scripts, manifests with SHA-256 hashes, preregistration and lock files, the deviations log and the number-verification script are in the release archive [PLACEHOLDER: update release.zip with the c_items/ and bitems/ scripts; repository DOI after deposit].
 
-**CRediT author statement.** [PLACEHOLDER: author name] — Conceptualization, Methodology, Supervision, Project administration, Writing – review and editing. [PLACEHOLDER: add "Validation" only after the author has independently checked results; no human validation has been done yet.] The AI assistant is not an author.
+**CRediT author statement.** [PLACEHOLDER: author name] — Conceptualization, Methodology, Supervision, Project administration, Writing – review and editing. [PLACEHOLDER: owner decides whether to add "Validation"; the owner blind-labelled a 16-item subset only.] The AI assistant is not an author.
 
-**Declaration of generative AI and AI-assisted technologies in the manuscript preparation process.** During the preparation of this work the author used an AI agent (Grok Bot) to write and run the analysis code; write the preregistration and sensitivity-procedure texts; produce all labels as a single AI labeller (53 disagreement and control items, 60 recall items, 113 + 80 + 80 scorer-validation items); read and summarise related literature; and draft the manuscript. The LLM judges in §6.2 are objects of study, not writing aids. [PLACEHOLDER: the standard sentence that the author reviewed and edited the content and takes full responsibility may be added only after the author's own verification step is completed; it has not been done yet, and the owner's 16 independent labels are pending.]
+**Declaration of generative AI and AI-assisted technologies in the manuscript preparation process.** During the preparation of this work the author used an AI agent (Grok Bot) to write and run the analysis code; write the preregistration and sensitivity-procedure texts; produce all labels except a blind 16-item owner check as a single AI labeller (53 disagreement and control items, 60 recall items, 113 + 80 + 80 scorer-validation items); read and summarise related literature; and draft the manuscript. The LLM judges in §6.2 are objects of study, not writing aids. [PLACEHOLDER: the standard sentence that the author reviewed and edited the content and takes full responsibility may be added only after the author's own verification step is completed; it has not been done yet; the owner has blind-labelled a 16-item subset (§6.2) but has not otherwise verified the results.]
 
 ## References
 
@@ -385,10 +385,10 @@ Mean ATT−EXEC gaps (important_instructions, error episodes dropped, 9 cells, s
 The full data is not a superset test. Each AgentDyn cell adds 40 shopping/github user tasks (60 vs 20 clusters), whose defense differences are smaller, so pooled estimates shrink: e.g. gemini-2.5-pro drift vs piguard_detector ΔEXEC goes from −0.050 to −0.009, and llama drift vs progent ΔATT from −0.29 to −0.093. Borderline cases cross the Holm threshold in both directions; gpt-4o-2024-08-06 progent vs tool_filter has ΔEXEC p = 0.0062 in the subset (not significant at m = 36) and 0.0042 in the full data (significant) [src: clustered/diag_results.json].
 
 ## Appendix D: Open issues
-1. Owner labels (16 items) pending; no human validation of any label.
+1. Human validation covers only the 16-item owner subset (14/16, κ = 0.62); no second human rater on the full label sets.
 2. AgentDyn maintainer issue awaiting owner approval (tracker checked 2026-10-16; no prior report of these defects).
 3. Flip analysis not re-run with corrected ATT labels for drift/progent.
-4. Several new reference author lists to verify; Zenodo folder built (`release_zenodo/`), license placeholder.
+4. Several new reference author lists to verify; Zenodo folder built (`pivot-checks/release_zenodo/`), license placeholder.
 5. User-task reference solutions: failures observed, not root-caused per task; `check()` "not injectable" behaviour root-caused (str-only filter).
 6. Human packet (40 episodes) awaiting a labeller; exposure census incomplete.
 
@@ -396,4 +396,4 @@ The full data is not a superset test. Each AgentDyn cell adds 40 shopping/github
 ## Erratum (2026-10-17)
 - OLD (exposure table, Agent-Sentry row): "exposed".
 - NEW: "plausibly exposed (inference; paper does not state use of ground_truth())".
-- Evidence: `audit/VERIFY_ROUND10.md` (round-10 verification note; that file is not part of this branch).
+- Evidence: `exposure/EXPOSURE_TABLE.md` (erratum entry, OLD/NEW); number check of this text: `review/verify_numbers_out_owner_20261019.txt`.
