@@ -1,0 +1,70 @@
+{
+ "api_calls": 0,
+ "date": "2026-10-19",
+ "hash_check": {
+  "hash_mismatch": 0,
+  "matched": 238,
+  "missing_rowkey": 0,
+  "of": 238,
+  "rowkeys_with_multiple_rows": 0
+ },
+ "items_jsonl": {
+  "bytes": 879915,
+  "canonical_form": "one json.dumps(sort_keys=True, ensure_ascii=False) per line, UTF-8, LF, sorted by id",
+  "committed": false,
+  "path_local_private": "local_private/hardset_v1/hardset_items.jsonl",
+  "rows": 238,
+  "sha256": "bc8246011c43e1f53d11ae88bb8777a89f205876e3ae03aaec2cf8e41742c9c7"
+ },
+ "manifest": {
+  "items": 238,
+  "matches_freeze_record": true,
+  "path": "datasets/attackset_hard_v1/MANIFEST.json",
+  "sha256": "786505ecaa77c6c8619495a23661eb364dd0c857c368a7c1cb9c383b8b7ba1d4"
+ },
+ "metadata_checks": {
+  "id_eq_sha1_rowkey": 238,
+  "scenario_eq": 238,
+  "team_prefix_eq": 238
+ },
+ "overlap_with_frozen_packs": {
+  "method": "exact: sha256 of lowercased whitespace-collapsed text (item text and item body) vs every string field of each pack record except metadata keys; near: word-token set Jaccard >= 0.6 vs item body (pack strings with >= 5 tokens)",
+  "packs": {
+   "phase1_confirm_v1": {
+    "exact_normalized_matches": [],
+    "max_jaccard": 0.2222,
+    "near_duplicates_jaccard_ge_0.6": [],
+    "records": 122,
+    "sha256": "c789811a07d3ed06e1c77d8a45eda6172f480226e006d84fa28386a982536d01"
+   },
+   "vnext_confirm_v1": {
+    "exact_normalized_matches": [],
+    "max_jaccard": 0.25,
+    "near_duplicates_jaccard_ge_0.6": [],
+    "records": 122,
+    "sha256": "523c881820710783b5290c76ea5fe5fc01a6341fb427defcba1119fc3e721518"
+   }
+  }
+ },
+ "source": {
+  "files_sha256": {
+   "raw_submissions_phase1.jsonl": "a9c62eca699dd270fdfbbfbfcc1253f5e5017f6d5a34ff7cb0f2cbb80b7f7c0a",
+   "raw_submissions_phase2.jsonl": "a9207e1d893ccb74ca6f9cc5eecea433bc49c23a26bed88088afd385c7ab18b6"
+  },
+  "hf_repo": "microsoft/llmail-inject-challenge",
+  "hf_revision": "1063bdf01ec8762b812d5e06ee768a06faa5a6f7"
+ },
+ "split": {
+  "counts": {
+   "calibration": 68,
+   "test": 170
+  },
+  "rule": "sha256('\\n'.join(sorted(f'{id}\\t{split}'))); split taken unchanged from MANIFEST.json, never redrawn",
+  "split_sha256": "93629be41f26f0ecf6779bd4cdfa6f97d09984b7ba6fd4ecd0ab7628646fdfa3",
+  "v1_1_needed": false
+ },
+ "status": "VERIFIED 238/238; split unchanged; overlap reported above",
+ "task": "Path 2 / T1b Hard set v1 rebuild (re-materialization, not re-selection)",
+ "text_convention": "f\"Subject of the email: {subject}.   Body: {body}\"",
+ "usd": 0.0
+}

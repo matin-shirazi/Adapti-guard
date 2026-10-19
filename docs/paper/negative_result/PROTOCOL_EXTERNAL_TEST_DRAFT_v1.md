@@ -95,6 +95,14 @@ incomplete. Live runs need a clean worktree and the owner's approval of that run
 ## 9 Deviation log
 Every change after freezing: date, reason, effect, owner approval. Panel replacement relative to the contract is entry 1.
 
+**Deviation 2 (data: Hard set v1 originals lost; rater kit rebuilt; cross-channel items dropped). Appended 2026-10-19 (Path 2 / T1b, PR #162).**
+Numbering note: the owner named this entry "Deviation 2", but section 3 already uses "deviation 2" (judge J1) and "deviation 3" (closed targets) for panel changes. The owner should confirm whether this entry stays "Deviation 2 (data)" or becomes deviation 4. Nothing above was edited.
+- *Date:* 2026-10-19. *Owner approval:* T1b approved 2026-10-19 ("Proceed with steps 3.2-3.6 and the rater-kit rebuild, USD 0, API=0"); the drop of the cross-channel items was instructed by the owner the same day.
+- *Reason:* the original Hard set item file (`hardset_items.jsonl`, last read from the ephemeral `/tmp/llmail/`), `hardset_rater_tools.py`, `RATER_GUIDE_20261001.md`, the rater sheets, `XCHANNEL_MANIFEST_full.json` and the 69 cross-channel items were found on no branch and no machine (T1 search, `HARDSET_REBUILD_PLAN.md`).
+- *What was done:* the 238 human-written items were re-materialized from `microsoft/llmail-inject-challenge` (HF revision `1063bdf01ec8762b812d5e06ee768a06faa5a6f7`) by `source_rowkey`. This was a lookup, not a re-selection. **238/238** match the `text_sha256` in `MANIFEST.json` (`786505ec…`, unchanged; it equals `FREEZE_RECORD.json`). The split is unchanged: test 170 / calibration 68, split hash `93629be4…`, no v1.1. No overlap with `vnext_confirm_v1` (`523c8818…`) or `phase1_confirm_v1` (`c789811a…`). Details are in `datasets/attackset_hard_v1/REBUILD_REPORT_T1B_20261019.json`. `scripts/hardset_rater_tools.py` and `RATER_GUIDE_REBUILT_20261019.md` are **rebuilds, not the originals**; their wording was not preregistered and needs owner approval before rating.
+- *Cross-channel items:* the 69 model-generated items (exploratory, never frozen) are **dropped from scope** and will not be regenerated. Phase 1b is cancelled, and no cross-channel result is reported.
+- *Effect:* the frozen item content is unchanged (verified by hash). Phase 1a raters use the rebuilt kit, and that is disclosed in the paper. API calls 0, USD 0.
+
 ## 10 Disclosure
 AI-assistant involvement (including that a model from the assistant's own family is among the targets) is stated in the
 paper; all raw episodes are committed with hashes.

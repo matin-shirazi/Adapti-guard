@@ -32,3 +32,6 @@ USD 0. No OpenRouter calls. Nothing changes under `datasets/frozen/**` or `exper
 
 ## 6. Owner decision needed
 (a) Check whether the original files exist on another device or backup (they were last expected at `/tmp/llmail`, which is ephemeral). (b) If not, approve steps 3.2–3.6 and the rater-kit rebuild, as T1b.
+
+## 7. Update 2026-10-19 (T1b, owner-approved; appended)
+Steps 3.2–3.6 were run at USD 0 with 0 API calls. **238/238 items match `text_sha256`.** The text convention is `"Subject of the email: {subject}.   Body: {body}"`. The split is unchanged (`93629be4…`), and there is no overlap with either frozen pack. The rater kit was rebuilt (`scripts/hardset_rater_tools.py`, `RATER_GUIDE_REBUILT_20261019.md`). The 69 cross-channel items are dropped. The protocol deviation log (section 9) records this as Deviation 2. Remaining gaps: two human raters, and owner approval of the guide wording. Item text exists only under `local_private/`.
