@@ -1,0 +1,22 @@
+{
+ "n": 16,
+ "agree": 14,
+ "raw_pct": 87.5,
+ "wilson95": [
+  0.64,
+  0.965
+ ],
+ "cohen_kappa": 0.619,
+ "disagreements": [
+  {
+   "id": "R15",
+   "owner": "executed",
+   "ai": "unclear"
+  },
+  {
+   "id": "R26",
+   "owner": "executed",
+   "ai": "unclear"
+  }
+ ]
+}
