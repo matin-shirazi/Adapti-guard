@@ -21,6 +21,7 @@ def _load(name):
 
 rb = _load("hardset_rebuild_t1b")
 rt = _load("hardset_rater_tools")
+hc = _load("hardset_checks")
 ITEMS = json.loads((HS / "MANIFEST.json").read_text())["items"]
 REPORT = json.loads((HS / "REBUILD_REPORT_T1B_20261019.json").read_text())
 
@@ -56,6 +57,47 @@ def test_no_overlap_with_frozen_packs_recorded_with_pack_hashes():
         p = REPORT["overlap_with_frozen_packs"]["packs"][name]
         assert p["sha256"] == sha == rb.sha256_file(ROOT / rel)
         assert p["exact_normalized_matches"] == [] and p["near_duplicates_jaccard_ge_0.6"] == []
+
+
+# --- T2: committed-files-only integrity checks (no local_private/, no skips) ---
+
+def test_t2_ids_rowkeys_and_text_hashes_unique():
+    r = hc.run()
+    assert r["n_items"] == 238
+    assert r["duplicate_ids"] == [] and r["duplicate_rowkeys"] == [] and r["duplicate_text_sha256"] == []
+    assert r["ids_eq_sha1_rowkey"] == 238
+
+
+def test_t2_split_hash_asserted_from_manifest():
+    r = hc.run()
+    assert r["split_counts"] == {"test": 170, "calibration": 68}
+    assert r["split_sha256"] == hc.SPLIT_SHA256 == rb.split_hash(ITEMS) \
+        == "93629be41f26f0ecf6779bd4cdfa6f97d09984b7ba6fd4ecd0ab7628646fdfa3"
+
+
+@pytest.mark.parametrize("pack,sha", [
+    ("vnext_confirm_v1", "523c881820710783b5290c76ea5fe5fc01a6341fb427defcba1119fc3e721518"),
+    ("phase1_confirm_v1", "c789811a07d3ed06e1c77d8a45eda6172f480226e006d84fa28386a982536d01"),
+])
+def test_t2_no_overlap_with_frozen_pack_from_manifest_hashes(pack, sha):
+    p = hc.run()["packs"][pack]
+    assert p["sha256"] == sha and p["records"] > 0 and p["strings_checked"] > 0
+    assert p["exact_text_overlap"] == [] and p["shared_ids"] == []
+
+
+def test_t2_overlap_check_detects_a_planted_match(tmp_path, monkeypatch):
+    # sensitivity: a pack string equal to a Hard set text (hash-wise) must be flagged
+    fake = [{"id": "x", "text_sha256": hc.sha256_text("planted text"), "split": "test"}]
+    pack = tmp_path / "p.jsonl"
+    pack.write_text(json.dumps({"id": "r1", "prompt": "  planted   text "}) + "\n")
+    monkeypatch.setattr(hc, "ROOT", tmp_path)
+    assert hc.pack_overlap(fake, "p.jsonl")["exact_text_overlap"] == ["r1"]
+
+
+def test_t2_checks_never_read_local_private():
+    src = (ROOT / "scripts/hardset_checks.py").read_text()
+    assert "local_private" not in src.split('"""', 2)[2]
+    assert hc.run()["all_pass"] is True
 
 
 def test_text_convention():
