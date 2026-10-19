@@ -9,6 +9,8 @@ docs/paper/negative_result/PHASES_BEFORE_MAIN_20261001.md:
                both raters; the rest are split alternately between A and B, so every item is rated
                at least once. Each rater's sheet order is shuffled independently. Sheets show only a
                blind id and the email text: no item id, split, team, cluster, phase or heuristic label.
+  check-blind  Verify that the sheets leak no item metadata (ids, row keys, split, team, cluster, phase,
+               scenario, heuristic label) and that blind ids differ between raters; exit 1 on any leak.
   agree        Read the two filled sheets + key, compute Cohen's kappa on q1 (mechanism) and percent
                agreement on q2 (injection requesting an unauthorized send) over double-rated items,
                check the Phase 1 exit gate, and write human-derived labels (the only allowed source
@@ -77,6 +79,44 @@ def make_sheets(items, out: Path, seed=DEFAULT_SEED, n_double=60):
     return key
 
 
+# manifest fields that must never appear on a rater sheet (only the email text is shown)
+BLIND_FORBIDDEN_FIELDS = ("id", "source_rowkey", "split", "team", "cluster", "source_phase", "source_scenario",
+                          "mechanism_heuristic_UNVALIDATED", "text_sha256")
+_GENERIC_VALUES = {"test", "calibration", "phase1", "phase2"}
+
+
+def check_blind(items, sheet_dir: Path):
+    """Return a list of leak descriptions (empty list == blind)."""
+    leaks = []
+    texts = {i["text"] for i in items}
+    forbidden = set(MECHANISMS[:-1]) | _GENERIC_VALUES
+    for i in items:
+        for f in BLIND_FORBIDDEN_FIELDS:
+            v = i.get(f)
+            if v is not None and str(v) and str(v) not in i["text"]:
+                forbidden.add(str(v))
+    bids = {}
+    for r in ("A", "B"):
+        with open(sheet_dir / f"sheet_rater_{r}.csv", encoding="utf-8", newline="") as fh:
+            rows = list(csv.DictReader(fh))
+        if not rows or tuple(rows[0].keys()) != SHEET_COLS:
+            leaks.append(f"{r}: columns {tuple(rows[0].keys()) if rows else ()} != {SHEET_COLS}")
+            continue
+        bids[r] = {row["blind_id"] for row in rows}
+        for row in rows:
+            b = row["blind_id"]
+            if row["email_text"] not in texts:
+                leaks.append(f"{r}:{b}: email_text is not an item text")
+            if b in forbidden or "llm-" in b:
+                leaks.append(f"{r}:{b}: blind_id leaks item metadata")
+            for col in ("q1_mechanism", "q2_injection_unauthorized_send", "notes"):
+                if row[col]:
+                    leaks.append(f"{r}:{b}: column {col} pre-filled")
+    if "A" in bids and "B" in bids and bids["A"] & bids["B"]:
+        leaks.append("blind ids shared between raters")
+    return leaks
+
+
 def cohen_kappa(a, b):
     assert len(a) == len(b) and a, "need paired, non-empty ratings"
     n = len(a)
@@ -137,6 +177,9 @@ def main(argv=None) -> int:
     m.add_argument("--out", required=True, type=Path)
     m.add_argument("--seed", type=int, default=DEFAULT_SEED)
     m.add_argument("--n-double", type=int, default=60)
+    c = sub.add_parser("check-blind")
+    c.add_argument("--items", required=True, type=Path)
+    c.add_argument("--dir", required=True, type=Path)
     g = sub.add_parser("agree")
     g.add_argument("--dir", required=True, type=Path)
     a = ap.parse_args(argv)
@@ -144,6 +187,11 @@ def main(argv=None) -> int:
         items = [json.loads(l) for l in a.items.read_text(encoding="utf-8").splitlines() if l.strip()]
         key = make_sheets(items, a.out, a.seed, a.n_double)
         print(json.dumps({r: len(v) for r, v in key["raters"].items()}))
+    elif a.cmd == "check-blind":
+        items = [json.loads(l) for l in a.items.read_text(encoding="utf-8").splitlines() if l.strip()]
+        leaks = check_blind(items, a.dir)
+        print(json.dumps({"blind": not leaks, "leaks": leaks[:20]}))
+        return 0 if not leaks else 1
     else:
         print(json.dumps(agree(a.dir)))
     return 0
