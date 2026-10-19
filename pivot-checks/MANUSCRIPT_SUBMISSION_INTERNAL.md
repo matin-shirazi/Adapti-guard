@@ -109,7 +109,7 @@ We do **not** claim to be the first audit of an AgentDojo-derived prompt-injecti
 - In this code version `check()` also reports every user task in every suite, including the four original AgentDojo suites, as "not injectable" (40/40, 20/20, 16/16, 21/21, 20/20). Root cause: tool-message content is a list of content blocks, and `is_task_injectable()` only scans string contents, so it returns False although the canary is present. The function is called only in the user-task section of `check()`, so it cannot affect injection-task checks [src: c_items/C_RESULTS.md; ext/injectable_probe_dyn.txt; ext/injectable_probe_agentdojo.txt].
 - Replaying user-task reference solutions, utility fails for shopping 20/20, github 13/20 and dailylife 9/20 user tasks (and workspace user_task_7). Most failing AgentDyn cases hit an OTP or verification gate that a static reference cannot pass (e.g. a hard-coded OTP rejected as incorrect). This affects the self-check, not stored labels; we did not audit each task [src: c_items/C_RESULTS.md; c_items/usertask_probe.txt].
 
-**Extended audit of related code bases [CODE FACT; EXPLORATORY scope; procedure hash-locked before running].** We ran the same unchanged `check()` and per-task logic on every registered suite and version of four code bases [src: ext/EXT_AUDIT_RESULTS.md; ext/audit_{agentdojo,agentdyn,autodojo}.txt; ext/PROCEDURE_EXT_AUDIT.sha256]: AgentDojo (089ed468, MIT [license to verify]), AgentDyn (SaFo-Lab 5353cf76, MIT), AutoDojo (xhOwenMa/AutoDojo aa458794, MIT) and uber/ADR (a6076aa3, Apache-2.0). ADR does not import as a package. By diff it is AgentDojo v1/v1_1 with only import paths and a `TASK_TYPE` attribute changed, so it was not executed. Unique injection tasks failing their own reference-solution check, counted once per code base where they are introduced:
+**Extended audit of related code bases [CODE FACT; EXPLORATORY scope; procedure hash-locked before running].** We ran the same unchanged `check()` and per-task logic on every registered suite and version of four code bases [src: ext/EXT_AUDIT_RESULTS.md; ext/audit_{agentdojo,agentdyn,autodojo}.txt; ext/PROCEDURE_EXT_AUDIT.sha256]: AgentDojo (089ed468, MIT), AgentDyn (SaFo-Lab 5353cf76, MIT), AutoDojo (xhOwenMa/AutoDojo aa458794, MIT) and uber/ADR (a6076aa3, Apache-2.0). ADR does not import as a package. By diff it is AgentDojo v1/v1_1 with only import paths and a `TASK_TYPE` attribute changed, so it was not executed. Unique injection tasks failing their own reference-solution check, counted once per code base where they are introduced:
 
 | Benchmark | Stub | Wrong args | Missing step | Tool absent | Other |
 |---|---|---|---|---|---|
@@ -263,7 +263,7 @@ On 600 AgentDyn gpt-4o attack episodes (200 per defense, 3 defenses), two LLM ju
 
 ## 9 Reproducibility
 
-All paths are relative to `/workspace/pivot-checks/`. Python 3 with numpy; AgentDyn code from `dyn/` (commit 5353cf7) installed in `venv/`. No network is needed except for the judge pilot.
+All paths are relative to the `pivot-checks/` directory of the repository. Python 3 with numpy; AgentDyn code from `dyn/` (commit 5353cf7) installed in `venv/`. No network is needed except for the judge pilot.
 
 | Result | Script / command | Output | Lock |
 |---|---|---|---|
@@ -388,7 +388,7 @@ The full data is not a superset test. Each AgentDyn cell adds 40 shopping/github
 1. Human validation covers only the 16-item owner subset (14/16, κ = 0.62); no second human rater on the full label sets.
 2. AgentDyn maintainer issue awaiting owner approval (tracker checked 2026-10-16; no prior report of these defects).
 3. Flip analysis not re-run with corrected ATT labels for drift/progent.
-4. Several new reference author lists to verify; Zenodo folder built (`release_zenodo/`), license placeholder.
+4. Several new reference author lists to verify; Zenodo folder built (`pivot-checks/release_zenodo/`), license placeholder.
 5. User-task reference solutions: failures observed, not root-caused per task; `check()` "not injectable" behaviour root-caused (str-only filter).
 6. Human packet (40 episodes) awaiting a labeller; exposure census incomplete.
 
@@ -396,4 +396,4 @@ The full data is not a superset test. Each AgentDyn cell adds 40 shopping/github
 ## Erratum (2026-10-17)
 - OLD (exposure table, Agent-Sentry row): "exposed".
 - NEW: "plausibly exposed (inference; paper does not state use of ground_truth())".
-- Evidence: `audit/VERIFY_ROUND10.md` (round-10 verification note; that file is not part of this branch).
+- Evidence: `exposure/EXPOSURE_TABLE.md` (erratum entry, OLD/NEW); number check of this text: `review/verify_numbers_out_owner_20261019.txt`.
