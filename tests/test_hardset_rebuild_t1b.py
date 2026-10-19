@@ -251,10 +251,23 @@ def test_t3_invalid_or_incomplete_sheets_rejected(tmp_path):
         rt.agree(tmp_path)
 
 
-def test_t3_rater_guide_rebuilt_unapproved_short_and_consistent():
+def test_t3_rater_guide_rebuilt_approved_short_and_consistent():
     g = (ROOT / "docs/paper/negative_result/RATER_GUIDE_REBUILT_20261019.md").read_text(encoding="utf-8")
-    assert "REBUILT, not original, awaiting owner approval" in g
-    assert "Owner approval: _not given_" in g
+    assert "REBUILT, not original" in g
+    assert "Owner approval: given 2026-10-19 (with edits a, b)" in g
+    assert "awaiting owner approval" not in g and "_not given_" not in g
+    order = ("obfuscated_encoding", "fake_markup_or_role", "structured_field", "authority_impersonation",
+             "workflow_embedded", "social_pressure", "plain_request")
+    assert " > ".join(f"`{m}`" for m in order) in g
+    assert "60 rows shared" in g and "89 rows of your own" in g and "149 rows in total" in g
     assert len(g.split()) <= 1000  # <= 2 pages
     for m in rt.MECHANISMS:
         assert f"`{m}`" in g
+
+
+def test_t3_sheet_sizes_match_guide(tmp_path):
+    key = rt.make_sheets(_manifest_like(), tmp_path)
+    a, b = key["raters"]["A"], key["raters"]["B"]
+    shared = set(a.values()) & set(b.values())
+    assert (len(a), len(b), len(shared)) == (149, 149, 60)
+    assert len(a) - 60 == len(b) - 60 == 89 and len(set(a.values()) | set(b.values())) == 238
