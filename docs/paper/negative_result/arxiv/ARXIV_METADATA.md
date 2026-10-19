@@ -1,3 +1,5 @@
+> **SUPERSEDED, DO NOT CITE.** The headline numbers (0.44->0.90, 0.97->0.80) are under correction (PROPOSED correction 2026-10-15, `docs/research/corrections/MANUSCRIPT_CORRECTIONS_DRAFT.md`, branch `docs/e1-b3-corrections`, commit `e8e9436`). See [`docs/PAPERS_STATUS.md`](../../../PAPERS_STATUS.md).
+
 # arXiv metadata, ready to paste (ASCII only; owner to confirm)
 
 arXiv metadata fields accept ASCII only, so the kappa and section signs of the manuscript are spelled out below.
