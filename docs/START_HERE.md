@@ -1,5 +1,7 @@
 # Start here
 
+Which paper is current, and what each manuscript may claim: [docs/PAPERS_STATUS.md](PAPERS_STATUS.md).
+
 Reviewer entry point for this repository. Documentation only: nothing here changes frozen evidence, runs a live model or retunes a detector.
 
 ## What this repository is
