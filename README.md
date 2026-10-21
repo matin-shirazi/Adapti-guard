@@ -9,6 +9,8 @@ This repository does **not** present a state-of-the-art defense, a production-re
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://github.com/matin-shirazi/Adapti-guard/blob/main/pyproject.toml)
 [![Reproducible: Offline](https://img.shields.io/badge/reproducibility-offline-green.svg)](https://github.com/matin-shirazi/Adapti-guard/blob/main/REPRODUCIBILITY.md)
 
+**Related work in progress:** An independent artifact audit of the [AgentDyn](https://github.com/SaFo-Lab/AgentDyn) benchmark. Manuscript in preparation (target: TMLR).
+
 ## Quick start for reviewers
 
 **Status:** manuscript draft from a single team; not independently replicated. No claim is made that any defense is effective.
