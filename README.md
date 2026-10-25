@@ -1,124 +1,181 @@
 # AdaptiGuard
 
-AdaptiGuard is an empirical case study showing how **measurement decisions in the evaluation of LLM-agent defenses can change conclusions on the same underlying traces**. The study re-scores and re-analyzes frozen runs of tool-using LLM agents under prompt-injection attacks, and examines how the choice of success endpoint, labeling rule and reporting unit changes what a defense evaluation appears to show.
+AdaptiGuard is an empirical case study showing how measurement decisions in the evaluation of LLM-agent defenses can change conclusions on the same underlying traces. It re-scores and re-analyzes frozen runs of tool-using agents under prompt injection. Quantities used in the draft manuscript are listed in the number ledger, linked below.
 
-This repository does **not** present a state-of-the-art defense, a production-ready security defense, or a general-purpose benchmark for all agents.
+The GitHub repository name stays `Adapti-guard`. The installable package name stays `adapti-guard` (`import adapti_guard`).
 
 [![Tests](https://github.com/matin-shirazi/Adapti-guard/actions/workflows/tests.yml/badge.svg)](https://github.com/matin-shirazi/Adapti-guard/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/github/license/matin-shirazi/Adapti-guard)](https://github.com/matin-shirazi/Adapti-guard/blob/main/LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://github.com/matin-shirazi/Adapti-guard/blob/main/pyproject.toml)
-[![Reproducible: Offline](https://img.shields.io/badge/reproducibility-offline-green.svg)](https://github.com/matin-shirazi/Adapti-guard/blob/main/REPRODUCIBILITY.md)
 
-**Related work in progress:** An independent artifact audit of the [AgentDyn](https://github.com/SaFo-Lab/AgentDyn) benchmark. Manuscript in preparation (target: TMLR).
+**Related work in progress:** AgentDyn artifact audit (in preparation).
+
+Scope, as stated in [`CITATION.cff`](CITATION.cff): cite this repository as that case study. The citation file says not to cite it as a confirmed, state-of-the-art, or production defense, and the abstract says it is not a general benchmark.
 
 ## Quick start for reviewers
-
-**Status:** manuscript draft from a single team; not independently replicated. No claim is made that any defense is effective.
 
 | If you want to | Go to |
 |---|---|
 | Read the study | [docs/paper/negative_result/MANUSCRIPT_DRAFT_v1.md](docs/paper/negative_result/MANUSCRIPT_DRAFT_v1.md) |
-| Check every number | [docs/paper/negative_result/NUMBERS_LEDGER.md](docs/paper/negative_result/NUMBERS_LEDGER.md) |
-| Reproduce offline | [Reproduce](#reproduce) and [REPRODUCIBILITY.md](REPRODUCIBILITY.md) |
-| Understand the layout and the frozen evidence | [docs/START_HERE.md](docs/START_HERE.md) |
+| Check a manuscript quantity | [docs/paper/negative_result/NUMBERS_LEDGER.md](docs/paper/negative_result/NUMBERS_LEDGER.md) |
+| Reproduce the offline analyses | [Reproduce](#reproduce) and [REPRODUCIBILITY.md](REPRODUCIBILITY.md) |
+| Layout and frozen-evidence labels | [docs/START_HERE.md](docs/START_HERE.md) |
 
-## Research focus
+Manuscript quantities are listed in the number ledger.
 
-The study concentrates on measurement decisions in the evaluation of runtime defenses, treated as candidate checks rather than a validated framework:
+## Goal
 
-- **Success endpoint**: whether an attack counts as successful when the model proposes a call or when the executor runs it.
-- **Blocked-payload labeling**: how payloads stopped by a defense are labeled.
-- **Scenario validity**: whether a scenario contains an attacker-controlled effect at all.
-- **Authorship independence**: who wrote the attack scenarios relative to the defense under test.
-- **Per-model reporting and noise floor**: whether results are reported per model and compared against run-to-run noise.
-- **Defense-channel verification**: whether the defense is actually applied to the untrusted channel.
+The study asks whether measurement decisions in a defense evaluation can change the conclusion drawn from one set of traces. The question, the candidate checks, and the draft write-up are in [`CITATION.cff`](CITATION.cff), [`docs/START_HERE.md`](docs/START_HERE.md), and [`docs/paper/negative_result/`](docs/paper/negative_result/).
 
-## Contributors
+## Method
 
-- **Reza Manzour** — independent reproducibility and methodology review (ongoing).
+The manuscript treats six checks as candidate measurement checks for runtime-defense evaluation, and the citation abstract uses the same list. The manuscript labels the sixth check preliminary.
 
-## Main research package
+- **Success endpoint.** Whether an attack counts as successful when the model proposes a call or when the executor runs it.
+- **Blocked-payload labeling.** How payloads stopped by a defense are labeled.
+- **Scenario validity.** Whether a scenario contains an attacker-controlled effect.
+- **Authorship independence.** Who wrote the attack scenarios relative to the defense under test.
+- **Per-model reporting and a noise floor.** Whether results are reported per model and compared with run-to-run variation.
+- **Defense-channel verification (preliminary in the manuscript).** Whether the defense is applied to the untrusted channel.
 
-The publication package lives in [`docs/paper/negative_result/`](docs/paper/negative_result/):
+The offline analyses in this tree are:
 
-- Manuscript: [`MANUSCRIPT_DRAFT_v1.md`](docs/paper/negative_result/MANUSCRIPT_DRAFT_v1.md) (assembled from the source sections in the same directory; do not edit by hand)
-- Figures 1 to 3 (csv, png, svg): [`figures/`](docs/paper/negative_result/figures/)
-- References: [`RELATED_WORK.md`](docs/paper/negative_result/RELATED_WORK.md) and [`references_extension.bib`](docs/paper/q1_findings/references_extension.bib)
-- Number ledger: [`NUMBERS_LEDGER.md`](docs/paper/negative_result/NUMBERS_LEDGER.md)
-- Appendices: [`APPENDIX_A_EXPLORATORY_PILOT.md`](docs/paper/negative_result/APPENDIX_A_EXPLORATORY_PILOT.md), [`APPENDIX_B_CHECKLIST.md`](docs/paper/negative_result/APPENDIX_B_CHECKLIST.md), [`APPENDIX_C_ARTIFACTS.md`](docs/paper/negative_result/APPENDIX_C_ARTIFACTS.md), [`APPENDIX_D_E3_DETAILED_RESULTS.md`](docs/paper/negative_result/APPENDIX_D_E3_DETAILED_RESULTS.md)
-- Package index: [`README.md`](docs/paper/negative_result/README.md)
+| Label in the manuscript | What the script reads | Script |
+|---|---|---|
+| E1, frozen judge-scored tracks | `experiments/real_llm_eval/VNEXT_CONFIRM/` and `experiments/real_llm_eval/PHASE1_CONFIRM/` prediction files, plus the frozen packs | `scripts/rescore_tracks_ab_deterministic.py` |
+| E2, exploratory harness run | `experiments/harness_v2/HARNESS_V2_EXPLORATORY_20260930/episodes.jsonl` | `scripts/analyze_harness_v2_exploratory.py` |
+| E3, partially independent set | `experiments/harness_v2/HARNESS_V2_INDEPENDENT_SCREEN_20260930/` and `HARNESS_V2_INDEPENDENT_DEFENDED_20260930/` | `scripts/analyze_independent_defended.py`, `scripts/audit_e3_delivery.py` |
+| E4, held-out rules and channel re-run | `experiments/real_llm_eval/MT1/r1/` and `experiments/real_llm_eval/MT1/spotlight_ctx_check_20260930/` | `scripts/apply_rules_second_dataset_mt1.py`, `scripts/analyze_spotlight_ctx_check.py` |
 
-The preregistration text in this package is a local draft; the external test was not externally registered.
+Figures 1 to 3 (csv, png, svg) are produced by `scripts/make_fig1_scoring_flip.py`, `scripts/make_fig2_susceptibility_heatmap.py`, and `scripts/make_fig3_defended_vs_a0.py`.
+
+An InjecAgent external test is reported from committed records under `experiments/external/`. Its protocol file, [`docs/paper/negative_result/PROTOCOL_EXTERNAL_TEST_DRAFT_v1.md`](docs/paper/negative_result/PROTOCOL_EXTERNAL_TEST_DRAFT_v1.md), is marked draft and not frozen. The manuscript states that this test was not externally registered. The directory name `experiments/external/injecagent_registered_20261001/` is historical. The analysis scripts for that test are not in this tree, so those steps are not part of the offline command below.
+
+## Current status
+
+- The main text is a draft: [`docs/paper/negative_result/MANUSCRIPT_DRAFT_v1.md`](docs/paper/negative_result/MANUSCRIPT_DRAFT_v1.md), assembled by `scripts/assemble_manuscript.py` from the section sources in that directory. The assembled file is generated.
+- The number ledger is generated by `scripts/build_number_ledger.py`. `tests/test_manuscript_number_ledger.py` checks that each ledger string appears in the assembled manuscript.
+- This tree does not contain an independent replication of the study.
+- Frozen-evidence labels used by the earlier dual-track documents are summarized in [`docs/START_HERE.md`](docs/START_HERE.md). That page is the place for those labels. The draft manuscript is a separate write-up.
+- Earlier dual-track notes, the workshop packet, and archived documents remain for provenance: [`docs/paper/dual_track/`](docs/paper/dual_track/), [`docs/paper/workshop_vnext_fail/`](docs/paper/workshop_vnext_fail/), [`docs/paper/q1_findings/`](docs/paper/q1_findings/), [`docs/archive/`](docs/archive/).
+- AgentDyn artifact audit (in preparation).
 
 ## Reproduce
 
+### Setup
+
 ```bash
 git clone https://github.com/matin-shirazi/Adapti-guard.git
-cd adapti-guard
+cd Adapti-guard
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"            # requires Python >= 3.12
-pytest -q                          # offline suite; no live LLM required
+pip install -e ".[dev]"            # Python >= 3.12; dependencies from requirements-core.txt
 ```
 
-Manuscript assembly and the number-ledger consistency check:
+`pip install -e ".[dev]"` installs the package and the pins in [`requirements-core.txt`](requirements-core.txt), including `matplotlib==3.11.2`. The figure scripts use that pin. `scripts/make_fig3_defended_vs_a0.py` sets `matplotlib.rcParams["svg.hashsalt"]` so the SVG identifiers stay stable.
+
+Offline checks that do not regenerate the manuscript:
+
+```bash
+pytest -q tests/test_manuscript_number_ledger.py
+pytest -q tests/test_workshop_vnext_fail_facts.py
+```
+
+`tests/test_workshop_vnext_fail_facts.py` runs `docs/paper/workshop_vnext_fail/verify_manuscript_facts.py`, which requires the maintainer-process links in [`docs/START_HERE.md`](docs/START_HERE.md).
+
+### Environment
+
+| Item | Record in this tree |
+|---|---|
+| Declared Python | `requires-python = ">=3.12"` in [`pyproject.toml`](pyproject.toml). [`.github/workflows/tests.yml`](.github/workflows/tests.yml) uses Python 3.12. |
+| Python on the harness runs | `3.12.3` in each `experiments/harness_v2/*/run_manifest.json` |
+| Figure stack | `matplotlib==3.11.2` in [`requirements-core.txt`](requirements-core.txt) |
+| Offline command | `scripts/reproduce_negative_result.sh` (no API key). It skips the InjecAgent steps when their scripts are absent. |
+| Live provider keys | Names only, empty, in [`.env.example`](.env.example). The offline command does not read them. Do not commit a filled `.env`. |
+
+VNEXT and Phase-1 confirm manifests record `temperature` `0.0` and `cache_enabled` `false`. The harness `run_manifest.json` files and the harness `episodes.jsonl` records have no temperature field and no seed field.
+
+### Seeds
+
+| Seed | Role | Where it is recorded |
+|---|---|---|
+| `61` | VNEXT pack mix order (file order). The live runner does not reshuffle the pack. | [`datasets/frozen/vnext_confirm_v1/manifest.json`](datasets/frozen/vnext_confirm_v1/manifest.json) (`"seed": 61`); [`scripts/run_vnext_confirm.py`](scripts/run_vnext_confirm.py) |
+| `42` | VNEXT confirm pipeline seed. `LOCKED_SEED` in code. The run manifest stores the same value. Bootstrap in that runner uses this seed. | [`experiments/real_llm_eval/VNEXT_CONFIRM/20260914-133147/manifest.json`](experiments/real_llm_eval/VNEXT_CONFIRM/20260914-133147/manifest.json); [`src/adapti_guard/experiments/vnext_confirm.py`](src/adapti_guard/experiments/vnext_confirm.py) |
+| `42` | Phase-1 confirm run seed, from that run's manifest. The Phase-1 pack manifest has no separate mix-seed field. | [`experiments/real_llm_eval/PHASE1_CONFIRM/phase1_confirm_20260914T213022Z_a2681e92/manifest.json`](experiments/real_llm_eval/PHASE1_CONFIRM/phase1_confirm_20260914T213022Z_a2681e92/manifest.json) |
+| `20260930` | E3 paired-bootstrap seed (5,000 resamples) and the E3 delivery-audit cluster bootstrap | [`scripts/make_fig3_defended_vs_a0.py`](scripts/make_fig3_defended_vs_a0.py); [`scripts/audit_e3_delivery.py`](scripts/audit_e3_delivery.py) |
+| `20260930` | InjecAgent live-run sampling seed | `seed` in `experiments/external/injecagent_live_20260930/MANIFEST.json` and the four model-specific `injecagent_live_20260930_*/MANIFEST.json` files |
+| `7` | Recorded on the committed InjecAgent cluster-bootstrap object (`resamples` 4000) | `cluster_bootstrap_spot_minus_a0.seed` in `docs/research/artifacts/injecagent_live_analysis_20260930.json` and the three model-suffixed analysis files next to it |
+| none recorded | Harness pilot manifests | `experiments/harness_v2/HARNESS_V2_*/run_manifest.json` has no `seed` field. `experiments/external/injecagent_registered_20261001/MANIFEST.json` has no `seed` field. `experiments/real_llm_eval/MT1/` has no run manifest recording a seed. |
+
+The InjecAgent analysis script that would recompute seed `7` is not in this tree. Treat that seed as a field on the committed JSON, not as a step this repository regenerates.
+
+### Run IDs
+
+| Manuscript piece | Run ID | Path | Pack identifier recorded on the run or pack |
+|---|---|---|---|
+| E1 Track A | `20260914-133147` | `experiments/real_llm_eval/VNEXT_CONFIRM/20260914-133147/` | pack `vnext_confirm_v1.0`; manifest `confirmation_sha256` `523c881820710783b5290c76ea5fe5fc01a6341fb427defcba1119fc3e721518` |
+| E1 Track B | `phase1_confirm_20260914T213022Z_a2681e92` | `experiments/real_llm_eval/PHASE1_CONFIRM/phase1_confirm_20260914T213022Z_a2681e92/` | pack `phase1_confirm_v1.0`; manifest `benchmark_sha` `c789811a07d3ed06e1c77d8a45eda6172f480226e006d84fa28386a982536d01` |
+| E2 | `HARNESS_V2_EXPLORATORY_20260930` | `experiments/harness_v2/HARNESS_V2_EXPLORATORY_20260930/` | manifest `pilot` `harness_v2_pilot_9001` |
+| E3 screen | `HARNESS_V2_INDEPENDENT_SCREEN_20260930` | `experiments/harness_v2/HARNESS_V2_INDEPENDENT_SCREEN_20260930/` | manifest `pilot` `harness_v2_pilot_9003` |
+| E3 defended | `HARNESS_V2_INDEPENDENT_DEFENDED_20260930` | `experiments/harness_v2/HARNESS_V2_INDEPENDENT_DEFENDED_20260930/` | manifest `pilot` `harness_v2_pilot_9004` |
+| E4 held-out rules | `MT1/r1` | `experiments/real_llm_eval/MT1/r1/` | prediction files only; no run manifest in that directory |
+| E4 channel check | `spotlight_ctx_check_20260930` | `experiments/real_llm_eval/MT1/spotlight_ctx_check_20260930/` | directory name is the id used by `scripts/analyze_spotlight_ctx_check.py` |
+| InjecAgent live records | `injecagent_live_20260930` and `injecagent_live_20260930_<model>` | `experiments/external/` | sampling seed `20260930` on those manifests, as listed above |
+
+`experiments/harness_v2/HARNESS_V2_EXPLORATORY_SMOKE_20260930/` contains `run_manifest.json` (`pilot` `harness_v2_pilot_9000`) and `cost_summary.json`. It has no `episodes.jsonl`. The offline script does not read it. [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) describes the smoke episode data as archive-only.
+
+Both confirm manifests name target `qwen/qwen-2.5-7b-instruct` and judge `qwen/qwen-2.5-72b-instruct`. Harness episode records store `model_id` on each episode. Outcome counts for those episodes are in the number ledger, not in this README.
+
+### Commands
+
+Regenerate the offline analyses, the three figures, the ledger, and the assembled manuscript from the committed traces:
+
+```bash
+PYTHON=python3.12 STRICT=1 bash scripts/reproduce_negative_result.sh
+```
+
+The script defaults `PYTHON` to `python3`. After the analysis steps it assembles the manuscript, rebuilds the ledger, and runs `tests/test_manuscript_number_ledger.py`. It then checks `git diff`. With `STRICT=1` it exits nonzero if that diff reports a change in any of:
+
+- `docs/paper/negative_result/MANUSCRIPT_DRAFT_v1.md`
+- `docs/paper/negative_result/NUMBERS_LEDGER.md`
+- `docs/paper/negative_result/figures`
+- `docs/research/artifacts/e3_delivery_audit_20261003.json`
+
+InjecAgent steps run only when `scripts/analyze_injecagent_live.py` exists and the external InjecAgent checkout is available. That script is not in the repository, so the command skips those steps. Also absent from the tree: `src/adapti_guard/evaluation/harness_v2/`, `scripts/run_harness_v2_pilot.py` (the runner named in the harness manifests), `scripts/injecagent_offline_check.py`, `scripts/audit_datasets.py`, `scripts/run_phase2_calibration.py`, and `scripts/run_injecagent_panel.py`.
+
+Published tags are `backup/audit-pivot-checks-pre-purge` and `historical-packages-recovery-20260920`. There is no tag `case-study-v1`. [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) records a separate commit-reachability note dated 2026-10-03.
+
+Assembly and the ledger test, without the full regeneration:
 
 ```bash
 python scripts/assemble_manuscript.py
 pytest -q tests/test_manuscript_number_ledger.py
 ```
 
-Offline regeneration of the manuscript numbers:
-
-```bash
-pip install -r requirements-core.txt            # pins matplotlib==3.11.2
-STRICT=1 bash scripts/reproduce_negative_result.sh
-```
-
-This regenerates the E1 to E4 analyses, the three figures, `NUMBERS_LEDGER.md` and the manuscript from the committed traces, runs the ledger consistency test, and with `STRICT=1` fails if a regenerated file differs from the committed copy (details in [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md)). It does **not** regenerate the external-test (InjecAgent, manuscript §6.6 and §6.7) analysis: those scripts and the external InjecAgent checkout are not in this repository, and the script skips those steps.
-
-**What is public and what is not.** Public in the tree: the frozen packs, the committed traces and derived artifacts, the offline analysis, figure, ledger and reproduction scripts, the manuscript sources. **Not** in the tree of any public branch or tag: the live multi-turn harness (`src/adapti_guard/evaluation/harness_v2/`) and its test, the E2/E3 run scripts, the calibration and InjecAgent run and analysis scripts, the attack-template files, per-episode trajectories, and the archive `case-study-v1` (no such tag exists on the public remote). Several of these exist in commits of the original history that can be fetched by full SHA but are not reachable from any branch or tag and are not guaranteed to persist; see `REPRODUCIBILITY.md`. The full harness is therefore **not** publicly released.
-
-Never commit `.env` or API keys. Copy `.env.example` only if you intentionally run live providers.
-
 ## Repository layout
 
 | Path | Role |
 |------|------|
 | `src/adapti_guard/` | Installable package (`import adapti_guard`) |
-| `configs/` | YAML/JSON configs |
-| `scripts/` | CLI entrypoints, including manuscript assembly and figure scripts |
-| `tests/` | Pytest, including the number-ledger check |
-| `docs/paper/negative_result/` | Manuscript package (main research package) |
-| `datasets/` | Frozen packs and pinned external samples; frozen packs are read-only |
-| `experiments/` | Run artifacts, including the external InjecAgent runs cited by the manuscript; read-only |
-
-## Research status
-
-- Manuscript package: verified
-- Manuscript assembly: verified
-- Number-ledger validation: verified
-- CI: passing
-- Historical and live evaluation artifacts: frozen and read-only where applicable
-- Full historical reproduction: not possible from the public tree (live harness, run scripts and external-test scripts are absent)
+| `configs/` | YAML and JSON configs |
+| `scripts/` | CLI entry points, including manuscript assembly and figure scripts |
+| `tests/` | Pytest, including the number-ledger check and the workshop facts check |
+| `docs/paper/negative_result/` | Draft manuscript package |
+| `docs/START_HERE.md` | Reviewer entry point |
+| `datasets/frozen/` | Frozen packs. Project docs say to leave them unchanged. |
+| `experiments/` | Committed run artifacts cited above. Project docs say to leave them unchanged. |
 
 ## Limitations
 
-- The study examines measurement validity; it makes no general claim that any defense is better than another.
-- Some historical artifacts and harness dependencies remain outside this publication transfer.
-- Frozen evidence must not be re-run or modified without an explicit human gate.
-
-## Historical material
-
-Earlier dual-track work (a confirmatory negative result and a separate scoped result on a different pack) and its workshop packet are kept for provenance and are not the main result of this study: [`docs/paper/dual_track/`](docs/paper/dual_track/), [`docs/paper/workshop_vnext_fail/`](docs/paper/workshop_vnext_fail/), [`docs/paper/q1_findings/`](docs/paper/q1_findings/), [`docs/archive/`](docs/archive/). Reviewer entry point for the repository as a whole: [`docs/START_HERE.md`](docs/START_HERE.md).
+The manuscript's own limit section is [`docs/paper/negative_result/MANUSCRIPT_DRAFT_v1.md`](docs/paper/negative_result/MANUSCRIPT_DRAFT_v1.md) (section 8 and section 9). In short, the draft studies measurement validity. [`CITATION.cff`](CITATION.cff) says not to cite the repository as a confirmed defense. The live multi-turn harness and the external-test runner are not in this tree, so a live re-run of those experiments is not a command this checkout provides. Frozen packs and committed run artifacts are inputs to the offline scripts.
 
 ## Citation
 
-See [`CITATION.cff`](CITATION.cff). Do not cite this repository as a confirmed, state-of-the-art or production defense.
+See [`CITATION.cff`](CITATION.cff). The software citation below follows that file and omits the contact address stored there.
 
 ```bibtex
 @software{adapti_guard,
-  author = {Shirazi Matin, Mohammadreza},
+  author = {Shirazi Matin, Seyed Mohammadreza},
   title  = {AdaptiGuard: An Empirical Case Study of Measurement Validity in the Evaluation of LLM-Agent Defenses},
   year   = {2026},
   url    = {https://github.com/matin-shirazi/Adapti-guard/},
