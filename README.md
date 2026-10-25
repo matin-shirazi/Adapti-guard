@@ -1,5 +1,7 @@
 # AdaptiGuard
 
+> **Which paper is current?** See [`docs/PAPERS_STATUS.md`](docs/PAPERS_STATUS.md). The AgentDyn audit is the primary paper; the negative-result draft on `main` is superseded and must not be cited.
+
 AdaptiGuard is an empirical case study showing how **measurement decisions in the evaluation of LLM-agent defenses can change conclusions on the same underlying traces**. The study re-scores and re-analyzes frozen runs of tool-using LLM agents under prompt-injection attacks, and examines how the choice of success endpoint, labeling rule and reporting unit changes what a defense evaluation appears to show.
 
 This repository does **not** present a state-of-the-art defense, a production-ready security defense, or a general-purpose benchmark for all agents.

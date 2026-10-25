@@ -1,5 +1,7 @@
 # Start here
 
+> **Which paper is current?** See [`docs/PAPERS_STATUS.md`](PAPERS_STATUS.md). The AgentDyn audit is the primary paper; the negative-result draft on `main` is superseded and must not be cited.
+
 Reviewer entry point for this repository. Documentation only: nothing here changes frozen evidence, runs a live model or retunes a detector.
 
 ## What this repository is
